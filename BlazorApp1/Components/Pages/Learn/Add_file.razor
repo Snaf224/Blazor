@@ -1,0 +1,62 @@
+﻿@page "/learn/add_file"
+@using BlazorApp1.Services
+@using BlazorApp1.Classes
+
+<h3>Hello, this is where the bot is tested</h3>
+
+
+<button @onclick="LoadFiles">Посмотреть содержимое</button>
+
+<!-- Вывод сообщения об успешной загрузке или отсутствии файлов -->
+@if (message != null)
+{
+    <p>@message</p>
+}
+
+<!-- Список файлов, если они доступны -->
+@if (files != null && files.Count > 0)
+{
+    <ul>
+        @foreach (var file in files)
+        {
+            <li>@file.Name</li> 
+        }
+    </ul>
+}
+else if (files != null && files.Count == 0)
+{
+    <p>Нет доступных файлов.</p>
+}
+
+@code {
+    // Список файлов и сообщение для отображения
+    private List<FileItem> files;
+    private string message;
+
+    // Внедрение сервиса для получения файлов от Telegram-бота
+    [Inject]
+    public FileService FileService { get; set; }
+
+    // Метод загрузки файлов
+    private async Task LoadFiles()
+    {
+        // Получение файлов с помощью сервиса
+        files = await FileService.GetFilesAsync();
+
+        // Проверка на наличие файлов и установка сообщения
+        if (files != null && files.Count > 0)
+        {
+            message = $"Загружено файлов: {files.Count}";
+        }
+        else
+        {
+            message = "Нет доступных файлов.";
+        }
+
+        // Логирование результата в консоль
+        Console.WriteLine(message);
+
+        //принудительное обновление
+        StateHasChanged();
+    }
+}
